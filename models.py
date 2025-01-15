@@ -6,6 +6,7 @@ from faker import Faker
 from decimal import Decimal
 
 import enum
+import random
 
 TOTAL_NR_OF_USERS = 1000
 
@@ -28,6 +29,10 @@ class User(db.Model):
     email: Mapped[str] = mapped_column(String(50), nullable=False)
     city: Mapped[str] = mapped_column(String(70), nullable=False)
     birth_date: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
+    user_type: Mapped[UserType] = mapped_column(
+        Enum(UserType, native_enum=True, create_constraint=True),
+        nullable=False
+    )
 
 
     def __str__(self):
@@ -42,7 +47,7 @@ class User(db.Model):
 
 
 def seed_users(db:SQLAlchemy):
-
+    list_of_user_type = list(UserType)
     fake = Faker("sv_SE")
     fake.seed(42)
 
@@ -58,6 +63,7 @@ def seed_users(db:SQLAlchemy):
         new_user.city = fake.city()
         new_user.birth_date = fake.date_of_birth(minimum_age=18, maximum_age=80).strftime("%Y-%m-%d")
         new_user.email = fake.email()
+        new_user.user_type = random.choice(list_of_user_type)
 
         db.session.add(new_user)
         db.session.commit()
